@@ -1,30 +1,51 @@
 <template>
   <div id="nav">
-    <router-link to="/">Home</router-link> |
-    <router-link to="/about">About</router-link>
+    <router-view />
   </div>
-  <router-view/>
 </template>
 
+<script lang='ts'>
+import { defineComponent, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router'
+
+export default defineComponent({
+  name: 'Home',
+  setup () {
+    const noMenu = ['/login', '/registered', '/changePassword']
+    const router = useRouter()
+    const unwatch = router.beforeEach((to, from, next) => {
+      if (noMenu.includes(to.path)) {
+        // 如果路径是 /login 则正常执行
+        next()
+      } else {
+        // 如果不是 /login，判断是否有 token
+        if (!window.localStorage.getItem('token')) {
+          // 如果没有，则跳至登录页面
+          next({ path: '/login' })
+        } else {
+          // 否则继续执行
+          next()
+        }
+      }
+      // state.showMenu = !noMenu.includes(to.path)
+      // state.currentPath = to.path
+      // document.title = pathMap[to.name]
+    })
+
+    onUnmounted(() => {
+      unwatch()
+    })
+
+    return {
+      
+    }
+  }
+})
+</script>
+
 <style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-}
-
-#nav {
-  padding: 30px;
-}
-
-#nav a {
-  font-weight: bold;
-  color: #2c3e50;
-}
-
-#nav a.router-link-exact-active {
-  color: #42b983;
+body,html {
+  margin: 0;
+  padding: 0;
 }
 </style>
